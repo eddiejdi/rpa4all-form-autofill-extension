@@ -79,6 +79,112 @@ function sendMessageToTab(tabId, message) {
   });
 }
 
+function executeScriptFill(tabId, payload) {
+  return new Promise((resolve, reject) => {
+    api.scripting.executeScript(
+      {
+        target: { tabId },
+        func: (data) => {
+          const selectors = {
+            theme: ['#marketingTheme', 'input[name="theme"]'],
+            audience: ['#marketingAudience', 'input[name="audience"]'],
+            notes: ['#marketingNotes', '#requestNotes', 'textarea[name="notes"]'],
+            name: ['#businessCardName', 'input[name="name"]'],
+            title: ['#businessCardTitle', '#requestRole', 'input[name="title"]', 'input[name="role"]'],
+            email: ['#businessCardEmail', '#requestEmail', 'input[name="email"]'],
+            phone: ['#businessCardPhone', '#requestPhone', 'input[name="phone"]'],
+            company: ['#requestCompany', 'input[name="company"]'],
+            legal_name: ['#requestLegalName', 'input[name="legalName"]'],
+            company_document: ['#requestCompanyDocument', 'input[name="companyDocument"]'],
+            contact: ['#requestContact', 'input[name="contact"]'],
+            representative_document: ['#requestRepresentativeDocument', 'input[name="representativeDocument"]'],
+            project: ['#requestProject', 'input[name="project"]'],
+            address: ['#requestAddress', 'input[name="address"]'],
+            address_number: ['#requestAddressNumber', 'input[name="addressNumber"]'],
+            address_complement: ['#requestAddressComplement', 'input[name="addressComplement"]'],
+            district: ['#requestDistrict', 'input[name="district"]'],
+            postal_code: ['#requestPostalCode', 'input[name="postalCode"]'],
+            temperature: ['#requestTemperature', 'select[name="temperature"]'],
+            volume: ['#requestVolume', 'input[name="volume"]'],
+            ingress: ['#requestIngress', 'input[name="ingress"]'],
+            retention: ['#requestRetention', 'select[name="retention"]'],
+            retrieval: ['#requestRetrieval', 'select[name="retrieval"]'],
+            sla: ['#requestSla', 'select[name="sla"]'],
+            compliance: ['#requestCompliance', 'select[name="compliance"]'],
+            redundancy: ['#requestRedundancy', 'select[name="redundancy"]'],
+            billing: ['#requestBilling', 'select[name="billing"]'],
+            term: ['#requestTerm', 'select[name="term"]'],
+            start_date: ['#requestStartDate', 'input[name="startDate"]'],
+            city: ['#requestCity', 'input[name="city"]'],
+            state: ['#requestState', 'input[name="state"]']
+          };
+
+          function norm(value) {
+            return String(value || '').toLowerCase().trim();
+          }
+
+          function emit(field) {
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+
+          function setField(field, value) {
+            if (!field || field.disabled) {
+              return false;
+            }
+            if (field.tagName === 'SELECT') {
+              const target = norm(value);
+              const options = Array.from(field.options || []);
+              const exact = options.find((opt) => norm(opt.value) === target || norm(opt.textContent) === target);
+              if (exact) {
+                field.value = exact.value;
+              } else {
+                const partial = options.find((opt) => {
+                  const ov = norm(opt.value);
+                  const ot = norm(opt.textContent);
+                  return ov.includes(target) || ot.includes(target) || target.includes(ov) || target.includes(ot);
+                });
+                field.value = partial ? partial.value : String(value);
+              }
+              emit(field);
+              return true;
+            }
+            field.value = String(value == null ? '' : value);
+            emit(field);
+            return true;
+          }
+
+          let filled = 0;
+          Object.keys(data || {}).forEach((key) => {
+            const value = data[key];
+            const options = selectors[key];
+            if (!options) {
+              return;
+            }
+            for (const selector of options) {
+              const node = document.querySelector(selector);
+              if (setField(node, value)) {
+                filled += 1;
+                break;
+              }
+            }
+          });
+          return { filled, totalKeys: Object.keys(data || {}).length, mode: 'script-fallback' };
+        },
+        args: [payload]
+      },
+      (results) => {
+        const err = api.runtime.lastError;
+        if (err) {
+          reject(new Error(err.message));
+          return;
+        }
+        resolve(results && results[0] ? results[0].result : { filled: 0, totalKeys: 0, mode: 'script-fallback' });
+      }
+    );
+  });
+}
+
 function renderRecords() {
   recordSelect.innerHTML = '';
   if (!records.length) {
@@ -148,12 +254,21 @@ async function fillCurrentTab() {
     throw new Error('Abra uma pagina *.rpa4all.com para preencher.');
   }
 
-  const response = await sendMessageToTab(tab.id, { type: 'fillForm', payload: selected.data });
-  if (!response || !response.ok) {
-    throw new Error(response && response.error ? response.error : 'Falha ao preencher formulario.');
+  let result = null;
+  try {
+    const response = await sendMessageToTab(tab.id, { type: 'fillForm', payload: selected.data });
+    if (!response || !response.ok) {
+      throw new Error(response && response.error ? response.error : 'Falha ao preencher formulario.');
+    }
+    result = response.result || {};
+  } catch (error) {
+    result = await executeScriptFill(tab.id, selected.data);
   }
 
-  const result = response.result || {};
+  if (!result || Number(result.filled || 0) === 0) {
+    result = await executeScriptFill(tab.id, selected.data);
+  }
+
   setStatus(`Preenchido: ${result.filled}/${result.totalKeys} campos.`);
 }
 

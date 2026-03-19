@@ -236,7 +236,15 @@ async function loadFromApi() {
 
 async function fillCurrentTab() {
   if (!records.length) {
-    throw new Error('Nenhum registro carregado.');
+    await loadFromCache();
+  }
+
+  if (!records.length) {
+    await loadFromSample();
+  }
+
+  if (!records.length) {
+    throw new Error('Nenhum registro carregado. Use "Carregar massa (API)" ou "Usar massa local".');
   }
 
   const index = Number(recordSelect.value || 0);
@@ -303,3 +311,12 @@ openOptionsButton.addEventListener('click', () => {
 loadFromCache().catch(() => {
   renderRecords();
 });
+
+// First run UX: if cache is empty, auto-load local sample so user can test immediately.
+setTimeout(() => {
+  if (!records.length) {
+    loadFromSample().catch(() => {
+      setStatus('Nenhum registro em cache. Clique em "Usar massa local" ou "Carregar massa (API)".', true);
+    });
+  }
+}, 0);

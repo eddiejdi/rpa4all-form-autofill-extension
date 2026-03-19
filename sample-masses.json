@@ -1,0 +1,36 @@
+{
+  "records": [
+    {
+      "id": "marketing-001",
+      "label": "Marketing Studio - Juridico",
+      "data": {
+        "theme": "automacao juridica com IA",
+        "audience": "escritorios de advocacia",
+        "notes": "destacar conformidade, reducao de retrabalho e SLA previsivel",
+        "name": "Camila Souza",
+        "title": "Consultora de Automacao e IA",
+        "email": "camila.souza@rpa4all.com",
+        "phone": "+55 11 98888-0001",
+        "tagline": "Automacao inteligente, observabilidade e IA aplicada",
+        "specialties": "Storage gerenciado, IA aplicada, observabilidade",
+        "note": "Aceleramos operacoes com governanca e previsibilidade"
+      }
+    },
+    {
+      "id": "marketing-002",
+      "label": "Marketing Studio - Varejo",
+      "data": {
+        "theme": "orquestracao de atendimento omnichannel",
+        "audience": "redes de varejo e e-commerce",
+        "notes": "foco em resposta rapida, NPS e automacao de backoffice",
+        "name": "Rafael Lima",
+        "title": "Especialista RPA4ALL",
+        "email": "rafael.lima@rpa4all.com",
+        "phone": "+55 21 97777-0002",
+        "tagline": "RPA, IA e operacao orientada por dados",
+        "specialties": "Monitoramento, automacao e IA",
+        "note": "Escala com seguranca, observabilidade e menos custo operacional"
+      }
+    }
+  ]
+}

@@ -31,6 +31,40 @@
         "specialties": "Monitoramento, automacao e IA",
         "note": "Escala com seguranca, observabilidade e menos custo operacional"
       }
+    },
+    {
+      "id": "storage-001",
+      "label": "Storage Request - Empresa Financeira",
+      "data": {
+        "company": "FinanData Tecnologia Ltda",
+        "legal_name": "FinanData Tecnologia e Servicos Digitais Ltda",
+        "company_document": "12.345.678/0001-90",
+        "contact": "Mariana Alves",
+        "title": "Gerente de Infra e Operacoes",
+        "email": "mariana.alves@finandata.com.br",
+        "phone": "+55 11 97777-1122",
+        "representative_document": "123.456.789-10",
+        "project": "Modernizacao de backup corporativo",
+        "address": "Avenida Paulista",
+        "address_number": "1500",
+        "address_complement": "15 andar",
+        "district": "Bela Vista",
+        "postal_code": "01310-200",
+        "temperature": "warm",
+        "volume": "180",
+        "ingress": "12",
+        "retention": "24",
+        "retrieval": "monthly",
+        "sla": "24h",
+        "compliance": "immutable30",
+        "redundancy": "dual",
+        "billing": "monthly",
+        "term": "24",
+        "start_date": "2026-04-15",
+        "city": "Sao Paulo",
+        "state": "SP",
+        "notes": "Operacao com exigencia LGPD, trilha de auditoria e janela de migracao noturna."
+      }
     }
   ]
 }

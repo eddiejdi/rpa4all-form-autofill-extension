@@ -11,7 +11,31 @@
     phone: ['#businessCardPhone', 'input[type="tel"]', 'input[name="phone"]', 'input[name="telefone"]'],
     tagline: ['#businessCardTagline'],
     specialties: ['#businessCardSpecialties'],
-    note: ['#businessCardNote']
+    note: ['#businessCardNote'],
+    company: ['#requestCompany', 'input[name="company"]'],
+    legal_name: ['#requestLegalName', 'input[name="legalName"]'],
+    company_document: ['#requestCompanyDocument', 'input[name="companyDocument"]'],
+    contact: ['#requestContact', 'input[name="contact"]'],
+    representative_document: ['#requestRepresentativeDocument', 'input[name="representativeDocument"]'],
+    project: ['#requestProject', 'input[name="project"]'],
+    address: ['#requestAddress', 'input[name="address"]'],
+    address_number: ['#requestAddressNumber', 'input[name="addressNumber"]'],
+    address_complement: ['#requestAddressComplement', 'input[name="addressComplement"]'],
+    district: ['#requestDistrict', 'input[name="district"]'],
+    postal_code: ['#requestPostalCode', 'input[name="postalCode"]'],
+    temperature: ['#requestTemperature', 'select[name="temperature"]'],
+    volume: ['#requestVolume', 'input[name="volume"]'],
+    ingress: ['#requestIngress', 'input[name="ingress"]'],
+    retention: ['#requestRetention', 'select[name="retention"]'],
+    retrieval: ['#requestRetrieval', 'select[name="retrieval"]'],
+    sla: ['#requestSla', 'select[name="sla"]'],
+    compliance: ['#requestCompliance', 'select[name="compliance"]'],
+    redundancy: ['#requestRedundancy', 'select[name="redundancy"]'],
+    billing: ['#requestBilling', 'select[name="billing"]'],
+    term: ['#requestTerm', 'select[name="term"]'],
+    start_date: ['#requestStartDate', 'input[name="startDate"]'],
+    city: ['#requestCity', 'input[name="city"]'],
+    state: ['#requestState', 'input[name="state"]']
   };
 
   const KEY_ALIASES = {
@@ -26,7 +50,25 @@
     observacao: 'notes',
     publico: 'audience',
     publico_alvo: 'audience',
-    tema: 'theme'
+    tema: 'theme',
+    razao_social: 'legal_name',
+    cnpj: 'company_document',
+    cpf: 'representative_document',
+    cpf_representante: 'representative_document',
+    telefone_contato: 'phone',
+    cargo_area: 'title',
+    logradouro: 'address',
+    numero: 'address_number',
+    complemento: 'address_complement',
+    bairro: 'district',
+    cep: 'postal_code',
+    uf: 'state',
+    volume_tb: 'volume',
+    novos_dados_mes_tb: 'ingress',
+    inicio_pretendido: 'start_date',
+    vigencia: 'term',
+    recuperacoes: 'retrieval',
+    faturamento: 'billing'
   };
 
   const FIELD_CANDIDATE_SELECTOR = 'input, textarea, select';
@@ -131,9 +173,32 @@
       const exact = options.find((opt) => normalize(opt.value) === target || normalize(opt.textContent) === target);
       if (exact) {
         field.value = exact.value;
-      } else if (options.length > 0) {
-        field.value = String(value);
+        return true;
       }
+
+      const partial = options.find((opt) => {
+        const optValue = normalize(opt.value);
+        const optText = normalize(opt.textContent);
+        return target.includes(optValue) || target.includes(optText) || optValue.includes(target) || optText.includes(target);
+      });
+      if (partial) {
+        field.value = partial.value;
+        return true;
+      }
+
+      const numberInTarget = target.match(/\d+/);
+      if (numberInTarget) {
+        const byNumber = options.find((opt) => {
+          const candidate = normalize(opt.value + ' ' + opt.textContent).match(/\d+/);
+          return candidate && candidate[0] === numberInTarget[0];
+        });
+        if (byNumber) {
+          field.value = byNumber.value;
+          return true;
+        }
+      }
+
+      field.value = String(value);
       return true;
     }
 
